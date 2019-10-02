@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IURLService, IURLHandler } from 'vs/platform/url/common/url';
+import { IURLService, IURLHandler, IOpenURLOptions } from 'vs/platform/url/common/url';
 import { URI, UriComponents } from 'vs/base/common/uri';
 import { IMainProcessService } from 'vs/platform/ipc/electron-browser/mainProcessService';
 import { URLHandlerChannel } from 'vs/platform/url/common/urlIpc';
@@ -46,16 +46,16 @@ export class RelayURLService extends URLService implements IURLHandler {
 		return uri.with({ query });
 	}
 
-	async open(resource: URI, options?: { openToSide?: boolean, openExternal?: boolean }): Promise<boolean> {
+	async open(resource: URI, options?: { openToSide?: boolean, openExternal?: boolean, trusted?: boolean }): Promise<boolean> {
 		if (resource.scheme !== product.urlProtocol) {
 			return false;
 		}
 
-		return await this.urlService.open(resource);
+		return await this.urlService.open(resource, options);
 	}
 
-	async handleURL(uri: URI): Promise<boolean> {
-		const result = await super.open(uri);
+	async handleURL(uri: URI, options?: IOpenURLOptions): Promise<boolean> {
+		const result = await super.open(uri, options);
 
 		if (result) {
 			await this.electronService.focusWindow();
